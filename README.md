@@ -2,6 +2,8 @@
 
 - Create React App
 - Configured TailwindCSS 
+- implement header component
+- 
 
 # Features
 - Login/Sign Up
@@ -17,3 +19,7 @@
 - NetflixGPT
     - Search Bar
     - Movie Suggestions
+
+
+# Fix
+- fix input autocomplete background

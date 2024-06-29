@@ -1,17 +1,32 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import Header from "./Header";
 import Input from "./Input";
+import { checkValidate } from "../utils/validate";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
   const [isSignInForm, setIsSignInForm] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const usernameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
 
   const toggleSignInForm = () => {
     setIsSignInForm(!isSignInForm);
   };
 
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const email = emailRef.current?.value;
+    const password = passwordRef.current?.value;
+
+    if (email && password) {
+      const validate = checkValidate(email, password);
+      setError(validate);
+    }
+  };
+
+  console.log(error);
   return (
     <div
       className="relative flex items-center justify-center min-h-dvh h-dvh bg-cover bg-center"
@@ -30,39 +45,44 @@ const Login = () => {
                 {isSignInForm ? "Sign in" : "Create an account"}
               </h1>
             </header>
-            <form className="flex flex-col gap-4">
+
+            <form
+              onSubmit={(e) => handleSubmit(e)}
+              className="flex flex-col gap-4"
+            >
               {!isSignInForm && (
                 <Input
+                  parentRef={usernameRef}
                   label="Username"
-                  onChange={(e: FormEvent) => setUsername(e.target.value)}
                   id="username"
                   type="text"
-                  value={username}
                 />
               )}
               <Input
+                parentRef={emailRef}
                 label="Email or mobile number"
-                onChange={(e: FormEvent) => setEmail(e.target.value)}
                 id="email"
-                type="email"
-                value={email}
+                type="text"
               />
               <Input
+                parentRef={passwordRef}
                 label="Password"
-                onChange={(e: FormEvent) => setPassword(e.target.value)}
                 id="password"
                 type="password"
-                value={password}
               />
               <button className="w-full py-[6px] px-4 bg-[#E50815] text-white rounded leading-7 font-medium hover:bg-red-700">
                 {isSignInForm ? "Sign in" : " Sign up"}
               </button>
-              {/* <p className="text-white text-opacity-70 text-base font-normal text-center">
-                OR
-              </p>
-              <button className="w-full py-[6px] px-4 bg-[#333333] bg-opacity-70 text-white rounded leading-7 font-medium hover:bg-opacity-60">
-                Use a Sign-In Code
-              </button> */}
+              {isSignInForm && (
+                <>
+                  <p className="text-white text-opacity-70 text-base font-normal text-center">
+                    OR
+                  </p>
+                  <button className="w-full py-[6px] px-4 bg-[#333333] bg-opacity-70 text-white rounded leading-7 font-medium hover:bg-opacity-60">
+                    Use a Sign-In Code
+                  </button>
+                </>
+              )}
               <p className="text-white text-opacity-70 mb-4 text-base font-normal">
                 {isSignInForm ? "New to Netflix?" : "Already registered?"}
                 <a
