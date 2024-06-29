@@ -1,9 +1,8 @@
 import { FormData, FormErrors } from "../components/AuthForm";
 
-
-export const validateForm = (formData: FormData, type: string) => {
+export const validateForm = (formData: FormData, isSignInForm: boolean) => {
   const errors: FormErrors = {};
-  if (type === "signup") {
+  if (!isSignInForm) {
     if (!formData.username.trim()) {
       //เช็คว่ามีการพิพม์ลง form มั้ย
       errors.username = "Please enter a valid username.";
@@ -20,7 +19,7 @@ export const validateForm = (formData: FormData, type: string) => {
 
   if (!formData.password.trim()) {
     errors.password = "Please enter a password.";
-  } else if (type === "signup" && formData.password.length < 6) {
+  } else if (!isSignInForm && formData.password.length < 6) {
     errors.password = "Your password must contain between 6 and 60 characters.";
   }
 

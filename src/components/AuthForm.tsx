@@ -1,4 +1,4 @@
-import { ChangeEvent, FC, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import Header from "./Header";
 import Input from "./Input";
 import { validateForm } from "../utils/validateForm";
@@ -14,11 +14,8 @@ export interface FormErrors {
   password?: string;
 }
 
-interface AuthFormProps {
-  type: "signin" | "signup";
-}
-
-const AuthForm: FC<AuthFormProps> = ({ type }) => {
+const AuthForm = () => {
+  const [isSignInForm, setIsSignInForm] = useState<boolean>(true);
   const [errors, setErrors] = useState<FormErrors>({});
   const [formData, setFormData] = useState<FormData>({
     username: "",
@@ -40,7 +37,7 @@ const AuthForm: FC<AuthFormProps> = ({ type }) => {
     e.preventDefault();
 
     // ส่งข้่อมูลที่กรอกจาก form ไป validate ที่ function validate
-    const errors = validateForm(formData, "signin");
+    const errors = validateForm(formData, isSignInForm);
 
     // ถ้า function validate return เป็น {} ซี่งก็คือ keys.length = 0 แปลว่าไม่มี error
     if (Object.keys(errors).length === 0) {
@@ -49,6 +46,10 @@ const AuthForm: FC<AuthFormProps> = ({ type }) => {
       // ถ้ามี error ให้เก็บไว้ใน state error
       setErrors(errors);
     }
+  };
+
+  const toggleSignInForm = () => {
+    setIsSignInForm(!isSignInForm);
   };
 
   console.log(errors);
@@ -65,11 +66,13 @@ const AuthForm: FC<AuthFormProps> = ({ type }) => {
         <div className="mb-12 max-w-md mx-auto">
           <div className="bg-black w-full py-12 px-16 min-h-[700px] bg-opacity-70 rounded-md">
             <header className="text-left">
-              <h1 className="text-white font-bold mb-7 text-[2rem]">Sign in</h1>
+              <h1 className="text-white font-bold mb-7 text-[2rem]">
+                {isSignInForm ? "Sign in" : "Create an account"}
+              </h1>
             </header>
 
             <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-              {type === "signup" && (
+              {!isSignInForm && (
                 <Input
                   label="Username"
                   id="username"
@@ -100,18 +103,25 @@ const AuthForm: FC<AuthFormProps> = ({ type }) => {
               />
 
               <button className="w-full py-[6px] px-4 bg-[#E50815] text-white rounded leading-7 font-medium hover:bg-red-700">
-                Sign in
+                {isSignInForm ? "Sign in" : " Sign up"}
               </button>
-              <p className="text-white text-opacity-70 text-base font-normal text-center">
-                OR
-              </p>
-              <button className="w-full py-[6px] px-4 bg-[#333333] bg-opacity-70 text-white rounded leading-7 font-medium hover:bg-opacity-60">
-                Use a Sign-In Code
-              </button>
+              {isSignInForm && (
+                <>
+                  <p className="text-white text-opacity-70 text-base font-normal text-center">
+                    OR
+                  </p>
+                  <button className="w-full py-[6px] px-4 bg-[#333333] bg-opacity-70 text-white rounded leading-7 font-medium hover:bg-opacity-60">
+                    Use a Sign-In Code
+                  </button>
+                </>
+              )}
               <p className="text-white text-opacity-70 mb-4 text-base font-normal">
-                New to Netflix?
-                <a className="text-white font-medium cursor-pointer ml-1 text-base">
-                  Sign up now
+                {isSignInForm ? "New to Netflix?" : "Already registered?"}
+                <a
+                  onClick={toggleSignInForm}
+                  className="text-white font-medium cursor-pointer ml-1 text-base"
+                >
+                  {isSignInForm ? "Sign up now" : "Sign in now"}
                 </a>
                 .
               </p>

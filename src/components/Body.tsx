@@ -6,7 +6,7 @@ const Body = () => {
   const route = createBrowserRouter([
     {
       path: "/",
-      element: <AuthForm type="signin" />,
+      element: <AuthForm />,
     },
     {
       path: "/browse",
