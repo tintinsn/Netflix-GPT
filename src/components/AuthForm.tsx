@@ -1,58 +1,127 @@
-import { ChangeEvent, FormEvent, useState } from "react";
-import Header from "./Header";
-import Input from "./Input";
-import { validateForm } from "../utils/validateForm";
+import { ChangeEvent, FormEvent, useState } from 'react'
+import Header from './Header'
+import Input from './Input'
+import { validateForm } from '../utils/validateForm'
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth'
+import { auth } from '../utils/firebase'
+import { useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { addUser } from '../utils/userSlice'
 
 export interface FormData {
-  username: string;
-  email: string;
-  password: string;
+  username: string
+  email: string
+  password: string
 }
 export interface FormErrors {
-  username?: string;
-  email?: string;
-  password?: string;
+  username?: string
+  email?: string
+  password?: string
 }
 
+// interface UserData {
+//   uid: string
+//   email: string
+//   displayName: string
+//   photoURL: string
+// }
+
 const AuthForm = () => {
-  const [isSignInForm, setIsSignInForm] = useState<boolean>(true);
-  const [errors, setErrors] = useState<FormErrors>({});
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const [isSignInForm, setIsSignInForm] = useState<boolean>(true)
+  const [errors, setErrors] = useState<FormErrors>({})
   const [formData, setFormData] = useState<FormData>({
-    username: "",
-    email: "",
-    password: "",
-  });
+    username: '',
+    email: '',
+    password: '',
+  })
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
-    }));
-  };
+    }))
+  }
 
   //   การส่ง Form
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    // ป้องกันไม่ให้ web reload
-    e.preventDefault();
+    e.preventDefault()
+    console.log(formData)
 
-    // ส่งข้่อมูลที่กรอกจาก form ไป validate ที่ function validate
-    const errors = validateForm(formData, isSignInForm);
+    const errors = validateForm(formData, isSignInForm) // ส่งข้่อมูลที่กรอกจาก form ไป validate ที่ function validate
+    setErrors(errors)
 
     // ถ้า function validate return เป็น {} ซี่งก็คือ keys.length = 0 แปลว่าไม่มี error
-    if (Object.keys(errors).length === 0) {
-      console.log("Form is valid:", formData);
+    // if (Object.keys(errors).length === 0) return;
+
+    //************************ Sign Up **************************/
+    if (!isSignInForm) {
+      // Sign-up logic
+      createUserWithEmailAndPassword(auth, formData.email, formData.password)
+        .then((userCredential) => {
+          // signed up
+          const user = userCredential.user // return object of user
+
+          // as soon as sign-up  it will update profile with displayName and user profile(photoURL)
+          updateProfile(user, {
+            displayName: formData.username,
+            photoURL: 'https://example.com/jane-q-user/profile.jpg',
+          })
+            .then(() => {
+              // Profile updated!
+              const user = auth.currentUser
+              if (user) {
+                dispatch(
+                  addUser({
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName,
+                    photoURL: user.photoURL,
+                  }),
+                )
+              }
+              console.log('Profile updated successfully')
+              navigate('/browse')
+            })
+            .catch((error) => {
+              // An error occurred
+              console.error('Error updating profile:', error)
+            })
+
+          // navigate('/')
+        })
+        .catch((error) => {
+          const errorCode = error.code
+          const errorMessage = error.message
+          console.log(errorCode)
+          console.log(errorMessage)
+        })
     } else {
-      // ถ้ามี error ให้เก็บไว้ใน state error
-      setErrors(errors);
+      //************************ Sign In **************************/
+      // Sign-in logic
+      signInWithEmailAndPassword(auth, formData.email, formData.password)
+        .then((userCredential) => {
+          // Signed in
+          const user = userCredential.user
+          console.log(user)
+
+          navigate('/browse')
+        })
+        .catch((error) => {
+          const errorCode = error.code
+          const errorMessage = error.message
+          console.log(errorCode)
+          console.log(errorMessage)
+        })
     }
-  };
+  }
 
   const toggleSignInForm = () => {
-    setIsSignInForm(!isSignInForm);
-  };
+    setIsSignInForm(!isSignInForm)
+  }
 
-  console.log(errors);
   return (
     <div
       className="relative flex items-center justify-center min-h-dvh h-dvh bg-cover bg-center"
@@ -67,7 +136,7 @@ const AuthForm = () => {
           <div className="bg-black w-full py-12 px-16 min-h-[700px] bg-opacity-70 rounded-md">
             <header className="text-left">
               <h1 className="text-white font-bold mb-7 text-[2rem]">
-                {isSignInForm ? "Sign in" : "Create an account"}
+                {isSignInForm ? 'Sign in' : 'Create an account'}
               </h1>
             </header>
 
@@ -103,25 +172,20 @@ const AuthForm = () => {
               />
 
               <button className="w-full py-[6px] px-4 bg-[#E50815] text-white rounded leading-7 font-medium hover:bg-red-700">
-                {isSignInForm ? "Sign in" : " Sign up"}
+                {isSignInForm ? 'Sign in' : ' Sign up'}
               </button>
               {isSignInForm && (
                 <>
-                  <p className="text-white text-opacity-70 text-base font-normal text-center">
-                    OR
-                  </p>
+                  <p className="text-white text-opacity-70 text-base font-normal text-center">OR</p>
                   <button className="w-full py-[6px] px-4 bg-[#333333] bg-opacity-70 text-white rounded leading-7 font-medium hover:bg-opacity-60">
                     Use a Sign-In Code
                   </button>
                 </>
               )}
               <p className="text-white text-opacity-70 mb-4 text-base font-normal">
-                {isSignInForm ? "New to Netflix?" : "Already registered?"}
-                <a
-                  onClick={toggleSignInForm}
-                  className="text-white font-medium cursor-pointer ml-1 text-base"
-                >
-                  {isSignInForm ? "Sign up now" : "Sign in now"}
+                {isSignInForm ? 'New to Netflix?' : 'Already registered?'}
+                <a onClick={toggleSignInForm} className="text-white font-medium cursor-pointer ml-1 text-base">
+                  {isSignInForm ? 'Sign up now' : 'Sign in now'}
                 </a>
                 .
               </p>
@@ -130,7 +194,7 @@ const AuthForm = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AuthForm;
+export default AuthForm

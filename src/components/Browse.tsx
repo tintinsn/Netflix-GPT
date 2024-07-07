@@ -1,5 +1,33 @@
-const Browse = () => {
-  return <div>Browse</div>;
-};
+import Navbar from './Navbar'
 
-export default Browse;
+const Browse = () => {
+  return (
+    <div>
+      <Navbar />
+      <div className="h-96 "></div>
+      <div className="h-96 "></div>
+      <div className="h-96 "></div>
+      <div className="h-96 "></div>
+      <div className="h-96 "></div>
+      <div className="h-96 "></div>
+      <div className="h-96 "></div>
+      <div className="h-96 "></div>
+      <div className="h-96 "></div>
+      <div className="h-96 "></div>
+      <div className="h-96 "></div>
+      <div className="h-96 "></div>
+      <div className="h-96 "></div>
+      <div className="h-96 "></div>
+      <div className="h-96 "></div>
+      <div className="h-96 "></div>
+      <div className="h-96 "></div>
+      <div className="h-96 "></div>
+      <div className="h-96 "></div>
+      <div className="h-96 "></div>
+      <div className="h-96 "></div>
+      <div className="h-96 "></div>
+    </div>
+  )
+}
+
+export default Browse
